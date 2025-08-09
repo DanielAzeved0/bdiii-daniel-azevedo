@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Produtos - Front-end</title>
+    <!-- Inclui a biblioteca Tailwind CSS para estilização rápida -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-4xl">
+        <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Catálogo de Produtos</h1>
+        
+        <!-- Formulário para adicionar e atualizar produtos -->
+        <div class="mb-8 p-6 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+            <h2 class="text-2xl font-semibold mb-4 text-blue-800">Gerenciar Produto</h2>
+            <form id="productForm" class="space-y-4">
+                <input type="hidden" id="productId">
+                <div>
+                    <label for="productName" class="block text-sm font-medium text-gray-700">Nome do Produto:</label>
+                    <input type="text" id="productName" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="productPrice" class="block text-sm font-medium text-gray-700">Preço:</label>
+                    <input type="number" id="productPrice" step="0.01" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="productCategory" class="block text-sm font-medium text-gray-700">Categoria:</label>
+                    <input type="text" id="productCategory" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div class="flex space-x-4">
+                    <button type="submit" id="submitBtn" class="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Adicionar Produto</button>
+                    <button type="button" id="cancelEditBtn" class="flex-1 px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded-md shadow-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors hidden">Cancelar Edição</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Seção para exibir a lista de produtos -->
+        <div class="p-6 bg-green-50 rounded-lg border-l-4 border-green-400">
+            <h2 class="text-2xl font-semibold mb-4 text-green-800">Produtos Disponíveis</h2>
+            <div id="productList" class="space-y-4">
+                <p class="text-center text-gray-500">Carregando produtos...</p>
+            </div>
+        </div>
+    </div>
+    <script>
+// URL da API do seu servidor Node.js //
+const apiUrl = 'http://localhost:3000/api/products';4
+
+// Configurações do Tailwind CSS
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                'blue-50': '#eff6ff',
+                'blue-400': '#60a5fa',
+                'blue-600': '#2563eb',
+                'green-50': '#f0fdf4',
+                'green-400': '#34d399',
+                'green-600': '#059669',
+                'gray-50': '#f9fafb',
+                'gray-200': '#e5e7eb',
+                'gray-300': '#d1d5db',
+                'gray-500': '#6b7280',
+                'gray-600': '#4b5563',
+                'gray-800': '#1f2937',
+            }
+        }
+    }
+};
+
+// Mapeia os elementos do DOMconst productList = document.getElementById('productList');
+const productForm = document.getElementById('productForm');
+const productNameInput = document.getElementById('productName');
+const productPriceInput = document.getElementById('productPrice');
+const productCategoryInput = document.getElementById('productCategory');
+const productIdInput = document.getElementById('productId');
+const submitBtn = document.getElementById('submitBtn');
+const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+// Função para buscar e renderizar todos os produtos*
+async function fetchProducts() {
+    try {
+        const response = await fetch(apiUrl);
+        const products = await response.json();
+        renderProducts(products);
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        productList.innerHTML = '<p class="text-center text-red-500">Erro ao carregar os produtos.</p>';
+    }
+}
+
+// Renderiza os produtos na interface
+function renderProducts(products) {
+    productList.innerHTML = '';
+    if (products.length === 0) {
+        productList.innerHTML = '<p class="text-center text-gray-500">Nenhum produto encontrado.</p>';
+    }
+    products.forEach(product => {
+        const productElement = document.createElement('div');
+        productElement.className = 'bg-gray-50 p-4 rounded-md shadow-sm border border-gray-200';
+        productElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-semibold text-gray-800">${product.nome}</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="editProduct('${product._id}')" class="px-2 py-1 bg-yellow-500 text-white rounded-md text-sm font-medium hover:bg-yellow-600 transition-colors">Editar</button>
+                            <button onclick="deleteProduct('${product._id}')" class="px-2 py-1 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-colors">Excluir</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">Preço: R$ ${product.preco.toFixed(2)}</p>
+                    <p class="text-gray-600">Categoria(s): ${Array.isArray(product.categorias) ? product.categorias.join(', ') : product.categorias}</p>
+                `;
+        productList.appendChild(productElement);
+    });
+}
+
+// Preenche o formulário para edição
+window.editProduct = async (id) => {
+    try {
+        const response = await fetch(`${apiUrl}/${id}`);
+        const products = await response.json(); // A API GET retorna um array de produtos, então precisamos encontrar o correto
+        const productToEdit = products.find(p => p._id === id);
+
+        if (productToEdit) {
+            productIdInput.value = productToEdit._id;
+            productNameInput.value = productToEdit.nome;
+            productPriceInput.value = productToEdit.preco;
+            productCategoryInput.value = Array.isArray(productToEdit.categorias) ? productToEdit.categorias.join(', ') : productToEdit.categorias;
+
+            submitBtn.textContent = 'Atualizar Produto';
+            submitBtn.classList.remove('bg-blue-600');
+            submitBtn.classList.add('bg-green-600');
+            cancelEditBtn.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar produto para edição:', error);
+    }
+};
+
+// Deleta um produto
+window.deleteProduct = async (id) => {
+    try {
+        const response = await fetch(`${apiUrl}/${id}`, {
+            method: 'DELETE'
+        });
+        if (response.ok) {
+            fetchProducts(); // Atualiza a lista após a exclusão
+        } else {
+            console.error('Erro ao excluir produto:', await response.text());
+        }
+    } catch (error) {
+        console.error('Erro ao excluir produto:', error);
+    }
+};
+
+// Lida com o envio do formulário (Adicionar ou Atualizar)
+productForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = productIdInput.value;
+    const product = {
+        nome: productNameInput.value,
+        preco: parseFloat(productPriceInput.value),
+        categorias: productCategoryInput.value.split(',').map(cat => cat.trim())
+    };
+
+    try {
+        if (id) {
+            // Atualizar produto existente
+            const response = await fetch(`${apiUrl}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(product)
+            });
+            if (!response.ok) {
+                throw new Error('Falha ao atualizar produto');
+            }
+        } else {
+            // Adicionar novo produto
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(product)
+            });
+            if (!response.ok) {
+                throw new Error('Falha ao adicionar produto');
+            }
+        }
+
+        // Limpa e atualiza a interface após a operação
+        cancelEdit();
+        fetchProducts();
+    } catch (error) {
+        console.error('Erro na operação:', error);
+    }
+});
+
+// Limpa o formulário e cancela o modo de edição
+function cancelEdit() {
+    productForm.reset();
+    productIdInput.value = '';
+    submitBtn.textContent = 'Adicionar Produto';
+    submitBtn.classList.remove('bg-green-600');
+    submitBtn.classList.add('bg-blue-600');
+    cancelEditBtn.classList.add('hidden');
+}
+
+// Adiciona evento de clique para o botão "Cancelar Edição"
+cancelEditBtn.addEventListener('click', cancelEdit);
+
+// Carrega os produtos ao iniciar a página
+window.onload = fetchProducts;
+    </script>
+</body>
+</html>

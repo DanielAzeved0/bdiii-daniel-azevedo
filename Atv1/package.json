@@ -1,0 +1,25 @@
+{
+  "name": "bdiii-daniel-azevedo",
+  "version": "1.0.0",
+  "description": "Aulas de Banco de Dados III com o professor Juarez Brandão",
+  "main": "BeckEnd.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanielAzeved0/bdiii-daniel-azevedo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DanielAzeved0/bdiii-daniel-azevedo/issues"
+  },
+  "homepage": "https://github.com/DanielAzeved0/bdiii-daniel-azevedo#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mongodb": "^6.18.0"
+  }
+}
