@@ -14,7 +14,7 @@ app.use(cors());
 
 // URL de conexão do MongoDB
 // IMPORTANTE: Substitua esta string pela URL do seu cluster MongoDB.
-const uri = "mongodb+srv://NielAzeved0:Daga1011@cluster0.bwkwqwp.mongodb.net/";
+const uri = "mongodb+srv://NielAzeved0:Daga1011@cluster0.bwkwqwp.mongodb.net/catalogo-produtos?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true";
 const client = new MongoClient(uri);
 
 let db; // Variável para armazenar a conexão com o banco de dados
