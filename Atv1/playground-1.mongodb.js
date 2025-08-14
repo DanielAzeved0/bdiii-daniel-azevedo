@@ -42,25 +42,25 @@ db.getCollection('sales').aggregate([
   { $group: { _id: '$item', totalSaleAmount: { $sum: { $multiply: [ '$price', '$quantity' ] } } } }
 ]);
 
-// Inserir um produto exemplo diretamente no MongoDB (apenas uma vez, para teste)
+/* Inserir um produto exemplo diretamente no MongoDB (apenas uma vez, para teste)
 db.produtos.insertOne({
-  nome: "Camiseta",
-  preco: 49.90,
-  categorias: ["roupa", "casual"]
+  nome: "João",
+  preco: 15.00,
+  categorias: ["escravo"]
 });
 
-// Consultar produtos com preço abaixo de 100
-db.produtos.find({ preco: { $lt: 100 } });
+//Consultar produtos com preço abaixo de 100
+db.produtos.find({ preco: { $lt: 19 } });
 
 
-// Consultar produtos na categoria "casual"
+//Consultar produtos na categoria "casual"
 db.produtos.find({ categorias: "casual" });
-
-// Atualizar o preço de um produto
+/*
+/* Atualizar o preço de um produto
 db.produtos.updateOne(
-  { nome: "Camiseta" },
-  { $set: { preco: 59.90 } }
+  { nome: "Joao" },
+  { $set: { preco: 19.99 } }
 );
-
+*/
 // Deletar um produto
-db.produtos.deleteOne({ nome: "Camiseta" });
+db.produtos.deleteOne({ nome:"João" }); 
